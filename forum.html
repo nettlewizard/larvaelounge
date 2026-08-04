@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>isabel - larvae lounge - forum</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Comic Sans MS", Arial;
+      color: #4f7d0b;
+      background: #ffffff;
+      margin: 0;
+      padding: 0 12px 40px;
+      overflow-x: hidden;
+    }
+    .navbar { text-align: center; padding: 10px; }
+    .navbar a { color: #4f7d0b; text-decoration: none; font-size: 18px; }
+
+    .board-form {
+      max-width: 500px;
+      margin: 30px auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+    }
+    .board-form textarea {
+      width: 100%;
+      font-family: "Comic Sans MS", Arial;
+      font-size: 16px;
+      padding: 10px;
+      border: 2px solid #4f7d0b;
+      border-radius: 6px;
+      resize: vertical;
+      min-height: 80px;
+    }
+    .board-form button {
+      font-family: "Comic Sans MS", Arial;
+      font-size: 16px;
+      padding: 10px;
+      border: 2px solid #4f7d0b;
+      border-radius: 6px;
+      background: #fff;
+      color: #4f7d0b;
+      cursor: pointer;
+    }
+    .board-form button:hover {
+      background: #4f7d0b;
+      color: #fff;
+    }
+
+    #drawing-pad {
+      touch-action: none;
+      background: #ffffff;
+      cursor: crosshair;
+      border: 2px solid #4f7d0b;
+      border-radius: 6px;
+      display: block;
+      vertical-align: top;
+    }
+
+    .pad-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .swatch {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid #4f7d0b;
+      cursor: pointer;
+      padding: 0;
+    }
+    .swatch.active {
+      outline: 2px solid #4f7d0b;
+      outline-offset: 2px;
+    }
+
+    .pad-controls button {
+      font-family: "Comic Sans MS", Arial;
+      font-size: 14px;
+      padding: 6px 10px;
+      border: 2px solid #4f7d0b;
+      border-radius: 6px;
+      background: #fff;
+      color: #4f7d0b;
+      cursor: pointer;
+    }
+
+    .board {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .post {
+      margin: 28px 0;
+      font-size: 18px;
+      line-height: 1.6;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+    .post img {
+      max-width: 300px;
+      display: block;
+      border: none;
+      outline: none;
+      box-shadow: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <a href="index.html">🐛 home</a>
+  </div>
+  <hr>
+
+  <form class="board-form" id="board-form">
+    <p style="margin: 0;">type something</p>
+    <textarea name="message" id="message-input" maxlength="500"></textarea>
+
+    <p style="margin: 0;">and/or draw something</p>
+    <canvas id="drawing-pad" width="300" height="300"></canvas>
+
+    <div class="pad-controls">
+      <button type="button" class="swatch active" style="background:#000000" data-color="#000000"></button>
+      <button type="button" class="swatch" style="background:#ff69b4" data-color="#ff69b4"></button>
+      <button type="button" class="swatch" style="background:#9932cc" data-color="#9932cc"></button>
+      <button type="button" class="swatch" style="background:#4f7d0b" data-color="#4f7d0b"></button>
+      <button type="button" class="swatch" style="background:#1e90ff" data-color="#1e90ff"></button>
+      <button type="button" class="swatch" style="background:#ff0000" data-color="#ff0000"></button>
+      <button type="button" id="clear-pad">clear drawing</button>
+    </div>
+
+    <button type="submit">post it</button>
+  </form>
+
+  <div class="board" id="board">loading...</div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getFirestore, collection, addDoc, getDocs, query, orderBy
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA5c0GKiLxq2_DDUGkRwZWosDcXgeiqJKc",
+      authDomain: "larvaelounge-whiteboard.firebaseapp.com",
+      projectId: "larvaelounge-whiteboard",
+      storageBucket: "larvaelounge-whiteboard.firebasestorage.app",
+      messagingSenderId: "654465728108",
+      appId: "1:654465728108:web:0e9fc68775fdc2d73f2249"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const postsCol = collection(db, "posts");
+
+    // ---- drawing pad, same as before ----
+    const canvas = document.getElementById('drawing-pad');
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#000000';
+
+    let drawing = false;
+    let hasDrawn = false;
+    let lastX = 0, lastY = 0;
+
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return {
+        x: (clientX - rect.left) * (canvas.width / rect.width),
+        y: (clientY - rect.top) * (canvas.height / rect.height),
+      };
+    }
+
+    function startDraw(e) {
+      e.preventDefault();
+      drawing = true;
+      const pos = getPos(e);
+      lastX = pos.x;
+      lastY = pos.y;
+    }
+
+    function moveDraw(e) {
+      if (!drawing) return;
+      e.preventDefault();
+      const pos = getPos(e);
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+      lastX = pos.x;
+      lastY = pos.y;
+      hasDrawn = true;
+    }
+
+    function endDraw() {
+      drawing = false;
+    }
+
+    canvas.addEventListener('mousedown', startDraw);
+    canvas.addEventListener('mousemove', moveDraw);
+    canvas.addEventListener('mouseup', endDraw);
+    canvas.addEventListener('mouseleave', endDraw);
+    canvas.addEventListener('touchstart', startDraw);
+    canvas.addEventListener('touchmove', moveDraw);
+    canvas.addEventListener('touchend', endDraw);
+
+    document.querySelectorAll('.swatch').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+        btn.classList.add('active');
+        ctx.strokeStyle = btn.getAttribute('data-color');
+      });
+    });
+
+    document.getElementById('clear-pad').addEventListener('click', function () {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      hasDrawn = false;
+    });
+
+    // ---- random text color, regenerated on every page load, same as original ----
+    function randomHexColor() {
+      return '#' + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0').toUpperCase();
+    }
+
+    // ---- submit a post ----
+    document.getElementById('board-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const text = document.getElementById('message-input').value.trim().slice(0, 500);
+      const drawingData = hasDrawn ? canvas.toDataURL('image/png') : null;
+
+      if (!text && !drawingData) return;
+
+      await addDoc(postsCol, {
+        text: text || null,
+        drawing: drawingData,
+        createdAt: Date.now() // used only for ordering, never displayed
+      });
+
+      document.getElementById('message-input').value = '';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      hasDrawn = false;
+
+      loadPosts();
+    });
+
+    // ---- load posts, newest first, same as original ----
+    async function loadPosts() {
+      const boardEl = document.getElementById('board');
+      boardEl.innerHTML = '';
+
+      const q = query(postsCol, orderBy('createdAt', 'desc'));
+      const snapshot = await getDocs(q);
+
+      snapshot.forEach(doc => {
+        const post = doc.data();
+        const div = document.createElement('div');
+        div.className = 'post';
+        div.style.color = randomHexColor();
+
+        if (post.text) {
+          div.textContent = post.text;
+        } else if (post.drawing) {
+          const img = document.createElement('img');
+          img.src = post.drawing;
+          img.alt = 'doodle';
+          div.appendChild(img);
+        }
+        boardEl.appendChild(div);
+      });
+    }
+
+    loadPosts();
+  </script>
+
+</body>
+</html>
