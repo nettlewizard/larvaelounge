@@ -144,7 +144,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import {
-      getFirestore, collection, addDoc, getDocs, query, orderBy, limit
+      getFirestore, collection, addDoc, getDocs, query, orderBy
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -239,41 +239,23 @@
     document.getElementById('board-form').addEventListener('submit', async function (e) {
       e.preventDefault();
 
-      const submitBtn = e.target.querySelector('button[type="submit"]');
-      if (submitBtn.disabled) return; // already saving, ignore extra clicks
-      submitBtn.disabled = true;
-
       const text = document.getElementById('message-input').value.trim().slice(0, 500);
       const drawingData = hasDrawn ? canvas.toDataURL('image/png') : null;
 
-      if (!text && !drawingData) {
-        submitBtn.disabled = false;
-        return;
-      }
+      if (!text && !drawingData) return;
 
-      try {
-        // figure out the next post number, like the old text1/doodle1 scheme
-        const lastPostQuery = query(postsCol, orderBy('postNum', 'desc'), limit(1));
-        const lastPostSnap = await getDocs(lastPostQuery);
-        const nextPostNum = lastPostSnap.empty ? 1 : lastPostSnap.docs[0].data().postNum + 1;
+      await addDoc(postsCol, {
+        text: text || null,
+        drawing: drawingData,
+        createdAt: Date.now() // used only for ordering, never displayed
+      });
 
-        await addDoc(postsCol, {
-          text: text || null,
-          drawing: drawingData,
-          postNum: nextPostNum, // human-readable order, e.g. "post 12"
-          postedAt: new Date().toLocaleString(), // readable date, for browsing in Firestore console only
-          createdAt: Date.now() // used only for sorting, never displayed
-        });
+      document.getElementById('message-input').value = '';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      hasDrawn = false;
 
-        document.getElementById('message-input').value = '';
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        hasDrawn = false;
-
-        loadPosts();
-      } finally {
-        submitBtn.disabled = false;
-      }
+      loadPosts();
     });
 
     // ---- load posts, newest first, same as original ----
