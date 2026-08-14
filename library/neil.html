@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>neil - larvae lounge</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: "Comic Sans MS", Arial; color: #4f7d0b; margin: 0; padding: 0 12px; overflow-x: hidden; }
+    * { box-sizing: border-box; }
+    img { max-width: 100%; height: auto; }
+    .navbar { text-align: center; padding: 10px; }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <a href="../index.html">🐛 home</a>
+  </div>
+  <hr>
+
+<div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 15px;">
+  <img class="neil-img" src="neildrawings/neil1.jpg">
+  <img class="neil-img" src="neildrawings/neil2.jpg">
+  <img class="neil-img" src="neildrawings/neil3.jpg">
+  <img class="neil-img" src="neildrawings/neil4.jpg">
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 15px;">
+  <img class="neil-img" src="neildrawings/neil5.jpg">
+  <img class="neil-img" src="neildrawings/neil6.jpg">
+  <img class="neil-img" src="neildrawings/neil7.jpg">
+  <img class="neil-img" src="neildrawings/neil8.jpg">
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 15px;">
+  <img class="neil-img" src="neildrawings/neil9.jpg">
+  <img class="neil-img" src="neildrawings/neil10.jpg">
+  <img class="neil-img" src="neildrawings/neil11.jpg">
+  <img class="neil-img" src="neildrawings/neil12.jpg">
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 15px;">
+  <img class="neil-img" src="neildrawings/neil13.jpg">
+  <img class="neil-img" src="neildrawings/neil14.jpg">
+  <img class="neil-img" src="neildrawings/neil15.jpg">
+  <img class="neil-img" src="neildrawings/neil16.jpg">
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 15px;">
+  <img class="neil-img" src="neildrawings/neil17.jpg">
+  <img class="neil-img" src="neildrawings/neil18.jpg">
+  <img class="neil-img" src="neildrawings/neil19.jpg">
+</div>
+
+<script>
+  // give each drawing a slightly random size, not too big, not too small
+  document.querySelectorAll('.neil-img').forEach(img => {
+    const width = 280 + Math.random() * 180; // range: 280px - 460px
+    img.style.width = width + 'px';
+  });
+</script>
+
+</body>
+</html>
