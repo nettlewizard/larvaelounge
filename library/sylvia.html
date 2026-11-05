@@ -6,13 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 body { font-family: "Comic Sans MS", cursive; color: #4f7d0b; }
-
-.navbar {
-text-align: center;
-padding: 10px;
-position: relative;
-z-index: 1;
-}
+.navbar { text-align: center; padding: 10px; }
 
 h1 {
 text-align: center;
@@ -41,14 +35,9 @@ z-index: 0;
 </head>
 <body>
 
-<div class="navbar">
-<a href="https://larvaelounge.net">🐛 home</a>
-</div>
-<hr>
-
 <h1>you found me!</h1>
 <p class="pdf-link">
-<a href="sylv.html">I Stole This Book From A Library (Pick A Path Poem copy 333)</a><br><br>
+<a href="library/sylv.html">I Stole This Book From A Library (Pick A Path Poem copy 333)</a><br><br>
 </p>
 
 <img class="random-pic" src="godsgay.png" alt="">
@@ -56,48 +45,47 @@ z-index: 0;
 <img class="random-pic" src="typing.jpg" alt="">
 
 <script>
-function randomColor() {
-  return "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0");
-}
+  function randomColor() {
+    return "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0");
+  }
 
-document.body.style.backgroundColor = randomColor();
-document.body.style.color = randomColor();
-document.querySelector("h1").style.color = randomColor();
+  document.body.style.backgroundColor = randomColor();
+  document.body.style.color = randomColor();
+  document.querySelector("h1").style.color = randomColor();
 
-var linkColor = randomColor();
-document.querySelectorAll("a").forEach(function (a) {
-  a.style.color = linkColor;
-});
-
-// random size and position for each picture, without overlapping
-window.addEventListener("load", function () {
-  var placed = [];
-
-  document.querySelectorAll(".random-pic").forEach(function (img) {
-    var maxWidth = Math.min(350, window.innerWidth * 0.6);
-    var width, height, left, top, spot;
-
-    for (var tries = 0; tries < 200; tries++) {
-      width = Math.floor(60 + Math.random() * (maxWidth - 60));
-      height = Math.floor(width * img.naturalHeight / img.naturalWidth);
-      left = Math.floor(Math.random() * Math.max(0, window.innerWidth - width));
-      top = Math.floor(Math.random() * Math.max(0, window.innerHeight - height));
-      spot = { left: left, top: top, right: left + width, bottom: top + height };
-
-      var overlaps = placed.some(function (p) {
-        return spot.left < p.right && spot.right > p.left &&
-               spot.top < p.bottom && spot.bottom > p.top;
-      });
-      if (!overlaps) break;
-    }
-
-    placed.push(spot);
-    img.style.width = width + "px";
-    img.style.left = left + "px";
-    img.style.top = top + "px";
+  var linkColor = randomColor();
+  document.querySelectorAll("a").forEach(function (a) {
+    a.style.color = linkColor;
   });
-});
-</script>
+
+  // random size and position for each picture, without overlapping
+  window.addEventListener("load", function () {
+    var placed = [];
+
+    document.querySelectorAll(".random-pic").forEach(function (img) {
+      var maxWidth = Math.min(350, window.innerWidth * 0.6);
+      var width, height, left, top, spot;
+
+      for (var tries = 0; tries < 200; tries++) {
+        width = Math.floor(60 + Math.random() * (maxWidth - 60));
+        height = Math.floor(width * img.naturalHeight / img.naturalWidth);
+        left = Math.floor(Math.random() * Math.max(0, window.innerWidth - width));
+        top = Math.floor(Math.random() * Math.max(0, window.innerHeight - height));
+        spot = { left: left, top: top, right: left + width, bottom: top + height };
+
+        var overlaps = placed.some(function (p) {
+          return spot.left < p.right && spot.right > p.left &&
+                 spot.top < p.bottom && spot.bottom > p.top;
+        });
+        if (!overlaps) break;
+      }
+
+      placed.push(spot);
+      img.style.width = width + "px";
+      img.style.left = left + "px";
+      img.style.top = top + "px";
+    });
+  });
 
 </body>
 </html>
