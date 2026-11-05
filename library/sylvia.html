@@ -6,12 +6,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 body { font-family: "Comic Sans MS", cursive; color: #4f7d0b; }
-.navbar { text-align: center; padding: 10px; }
+
+.navbar {
+text-align: center;
+padding: 10px;
+position: relative;
+z-index: 1;
+}
 
 h1 {
 text-align: center;
 font-size: 4em;
-color: #8a2be2;
 margin-top: 30px;
 position: relative;
 z-index: 1;
@@ -24,9 +29,6 @@ position: relative;
 z-index: 1;
 }
 
-.pdf-link a { color: #8a2be2; }
-.pdf-link a:hover { color: #4f7d0b; }
-
 .random-pic {
 position: absolute;
 z-index: 0;
@@ -35,9 +37,14 @@ z-index: 0;
 </head>
 <body>
 
+<div class="navbar">
+<a href="https://larvaelounge.net">🐛 home</a>
+</div>
+<hr>
+
 <h1>you found me!</h1>
 <p class="pdf-link">
-<a href="library/sylv.html">I Stole This Book From A Library (Pick A Path Poem copy 333)</a><br><br>
+<a href="sylv.html">I Stole This Book From A Library (Pick A Path Poem copy 333)</a>
 </p>
 
 <img class="random-pic" src="godsgay.png" alt="">
@@ -45,47 +52,36 @@ z-index: 0;
 <img class="random-pic" src="typing.jpg" alt="">
 
 <script>
-  function randomColor() {
-    return "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0");
-  }
+var fonts = ["Comic Sans MS", "Courier New", "Georgia", "Impact", "Times New Roman", "Verdana", "Papyrus"];
 
-  document.body.style.backgroundColor = randomColor();
-  document.body.style.color = randomColor();
-  document.querySelector("h1").style.color = randomColor();
+function randomColor() {
+  return "rgb(" + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + ")";
+}
 
-  var linkColor = randomColor();
-  document.querySelectorAll("a").forEach(function (a) {
-    a.style.color = linkColor;
-  });
+function randomFont() {
+  return fonts[Math.floor(Math.random() * fonts.length)];
+}
 
-  // random size and position for each picture, without overlapping
-  window.addEventListener("load", function () {
-    var placed = [];
+document.body.style.backgroundColor = randomColor();
 
-    document.querySelectorAll(".random-pic").forEach(function (img) {
-      var maxWidth = Math.min(350, window.innerWidth * 0.6);
-      var width, height, left, top, spot;
+var h1 = document.getElementsByTagName("h1")[0];
+h1.style.color = randomColor();
+h1.style.fontFamily = randomFont();
 
-      for (var tries = 0; tries < 200; tries++) {
-        width = Math.floor(60 + Math.random() * (maxWidth - 60));
-        height = Math.floor(width * img.naturalHeight / img.naturalWidth);
-        left = Math.floor(Math.random() * Math.max(0, window.innerWidth - width));
-        top = Math.floor(Math.random() * Math.max(0, window.innerHeight - height));
-        spot = { left: left, top: top, right: left + width, bottom: top + height };
+var links = document.getElementsByTagName("a");
+for (var i = 0; i < links.length; i++) {
+  links[i].style.color = randomColor();
+  links[i].style.fontFamily = randomFont();
+}
 
-        var overlaps = placed.some(function (p) {
-          return spot.left < p.right && spot.right > p.left &&
-                 spot.top < p.bottom && spot.bottom > p.top;
-        });
-        if (!overlaps) break;
-      }
-
-      placed.push(spot);
-      img.style.width = width + "px";
-      img.style.left = left + "px";
-      img.style.top = top + "px";
-    });
-  });
+var pics = document.getElementsByClassName("random-pic");
+for (var j = 0; j < pics.length; j++) {
+  var width = Math.floor(80 + Math.random() * 220);
+  pics[j].style.width = width + "px";
+  pics[j].style.left = Math.floor(Math.random() * (window.innerWidth - width)) + "px";
+  pics[j].style.top = Math.floor(Math.random() * (window.innerHeight - width)) + "px";
+}
+</script>
 
 </body>
 </html>
