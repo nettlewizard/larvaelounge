@@ -13,15 +13,24 @@ text-align: center;
 font-size: 4em;
 color: #8a2be2;
 margin-top: 30px;
+position: relative;
+z-index: 1;
 }
 
 .pdf-link {
 text-align: center;
 font-size: 1.3em;
+position: relative;
+z-index: 1;
 }
 
 .pdf-link a { color: #8a2be2; }
 .pdf-link a:hover { color: #4f7d0b; }
+
+.random-pic {
+position: absolute;
+z-index: 0;
+}
 </style>
 </head>
 <body>
@@ -30,6 +39,10 @@ font-size: 1.3em;
 <p class="pdf-link">
 <a href="library/sylv.html">I Stole This Book From A Library (Pick A Path Poem copy 333)</a><br><br>
 </p>
+
+<img class="random-pic" src="library/godsgay.png" alt="">
+<img class="random-pic" src="library/palindrome.jpg" alt="">
+<img class="random-pic" src="library/typing.jpg" alt="">
 
 <script>
   function randomColor() {
@@ -43,6 +56,15 @@ font-size: 1.3em;
   var linkColor = randomColor();
   document.querySelectorAll("a").forEach(function (a) {
     a.style.color = linkColor;
+  });
+
+  // random size and position for each picture
+  document.querySelectorAll(".random-pic").forEach(function (img) {
+    var maxWidth = Math.min(350, window.innerWidth * 0.6);
+    var width = Math.floor(60 + Math.random() * (maxWidth - 60));
+    img.style.width = width + "px";
+    img.style.left = Math.floor(Math.random() * (window.innerWidth - width)) + "px";
+    img.style.top = Math.floor(Math.random() * (window.innerHeight - width)) + "px";
   });
 </script>
 
