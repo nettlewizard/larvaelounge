@@ -41,8 +41,8 @@ z-index: 0;
 </p>
 
 <img class="random-pic" src="godsgay.png" alt="">
-<img class="random-pic" src="library/palindrome.jpg" alt="">
-<img class="random-pic" src="library/typing.jpg" alt="">
+<img class="random-pic" src="palindrome.jpg" alt="">
+<img class="random-pic" src="typing.jpg" alt="">
 
 <script>
   function randomColor() {
@@ -58,15 +58,34 @@ z-index: 0;
     a.style.color = linkColor;
   });
 
-  // random size and position for each picture
-  document.querySelectorAll(".random-pic").forEach(function (img) {
-    var maxWidth = Math.min(350, window.innerWidth * 0.6);
-    var width = Math.floor(60 + Math.random() * (maxWidth - 60));
-    img.style.width = width + "px";
-    img.style.left = Math.floor(Math.random() * (window.innerWidth - width)) + "px";
-    img.style.top = Math.floor(Math.random() * (window.innerHeight - width)) + "px";
+  // random size and position for each picture, without overlapping
+  window.addEventListener("load", function () {
+    var placed = [];
+
+    document.querySelectorAll(".random-pic").forEach(function (img) {
+      var maxWidth = Math.min(350, window.innerWidth * 0.6);
+      var width, height, left, top, spot;
+
+      for (var tries = 0; tries < 200; tries++) {
+        width = Math.floor(60 + Math.random() * (maxWidth - 60));
+        height = Math.floor(width * img.naturalHeight / img.naturalWidth);
+        left = Math.floor(Math.random() * Math.max(0, window.innerWidth - width));
+        top = Math.floor(Math.random() * Math.max(0, window.innerHeight - height));
+        spot = { left: left, top: top, right: left + width, bottom: top + height };
+
+        var overlaps = placed.some(function (p) {
+          return spot.left < p.right && spot.right > p.left &&
+                 spot.top < p.bottom && spot.bottom > p.top;
+        });
+        if (!overlaps) break;
+      }
+
+      placed.push(spot);
+      img.style.width = width + "px";
+      img.style.left = left + "px";
+      img.style.top = top + "px";
+    });
   });
-</script>
 
 </body>
 </html>
