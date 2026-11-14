@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -16,7 +17,7 @@
     }
     .navbar { text-align: center; padding: 10px; }
     .navbar a { color: #4f7d0b; text-decoration: none; font-size: 18px; }
-
+ 
     .board-form {
       max-width: 500px;
       margin: 30px auto;
@@ -49,7 +50,7 @@
       background: #4f7d0b;
       color: #fff;
     }
-
+ 
     #drawing-pad {
       touch-action: none;
       background: #ffffff;
@@ -59,7 +60,7 @@
       display: block;
       vertical-align: top;
     }
-
+ 
     .pad-controls {
       display: flex;
       flex-wrap: wrap;
@@ -67,7 +68,7 @@
       align-items: center;
       justify-content: center;
     }
-
+ 
     .swatch {
       width: 24px;
       height: 24px;
@@ -80,7 +81,7 @@
       outline: 2px solid #4f7d0b;
       outline-offset: 2px;
     }
-
+ 
     .pad-controls button {
       font-family: "Comic Sans MS", Arial;
       font-size: 14px;
@@ -91,7 +92,7 @@
       color: #4f7d0b;
       cursor: pointer;
     }
-
+ 
     .board {
       max-width: 600px;
       margin: 0 auto;
@@ -113,19 +114,19 @@
   </style>
 </head>
 <body>
-
+ 
   <div class="navbar">
     <a href="index.html">🐛 home</a>
   </div>
   <hr>
-
+ 
   <form class="board-form" id="board-form">
     <p style="margin: 0;">type something</p>
     <textarea name="message" id="message-input" maxlength="500"></textarea>
-
+ 
     <p style="margin: 0;">and/or draw something</p>
     <canvas id="drawing-pad" width="300" height="300"></canvas>
-
+ 
     <div class="pad-controls">
       <button type="button" class="swatch active" style="background:#000000" data-color="#000000"></button>
       <button type="button" class="swatch" style="background:#ff69b4" data-color="#ff69b4"></button>
@@ -135,18 +136,18 @@
       <button type="button" class="swatch" style="background:#ff0000" data-color="#ff0000"></button>
       <button type="button" id="clear-pad">clear drawing</button>
     </div>
-
+ 
     <button type="submit">post it</button>
   </form>
-
+ 
   <div class="board" id="board">loading...</div>
-
+ 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import {
       getFirestore, collection, addDoc, getDocs, query, orderBy, limit
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
+ 
     const firebaseConfig = {
       apiKey: "AIzaSyA5c0GKiLxq2_DDUGkRwZWosDcXgeiqJKc",
       authDomain: "larvaelounge-whiteboard.firebaseapp.com",
@@ -155,11 +156,11 @@
       messagingSenderId: "654465728108",
       appId: "1:654465728108:web:0e9fc68775fdc2d73f2249"
     };
-
+ 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const postsCol = collection(db, "posts");
-
+ 
     // ---- drawing pad, same as before ----
     const canvas = document.getElementById('drawing-pad');
     const ctx = canvas.getContext('2d');
@@ -168,11 +169,11 @@
     ctx.lineWidth = 3;
     ctx.lineCap = 'round';
     ctx.strokeStyle = '#000000';
-
+ 
     let drawing = false;
     let hasDrawn = false;
     let lastX = 0, lastY = 0;
-
+ 
     function getPos(e) {
       const rect = canvas.getBoundingClientRect();
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -182,7 +183,7 @@
         y: (clientY - rect.top) * (canvas.height / rect.height),
       };
     }
-
+ 
     function startDraw(e) {
       e.preventDefault();
       drawing = true;
@@ -190,7 +191,7 @@
       lastX = pos.x;
       lastY = pos.y;
     }
-
+ 
     function moveDraw(e) {
       if (!drawing) return;
       e.preventDefault();
@@ -203,11 +204,11 @@
       lastY = pos.y;
       hasDrawn = true;
     }
-
+ 
     function endDraw() {
       drawing = false;
     }
-
+ 
     canvas.addEventListener('mousedown', startDraw);
     canvas.addEventListener('mousemove', moveDraw);
     canvas.addEventListener('mouseup', endDraw);
@@ -215,7 +216,7 @@
     canvas.addEventListener('touchstart', startDraw);
     canvas.addEventListener('touchmove', moveDraw);
     canvas.addEventListener('touchend', endDraw);
-
+ 
     document.querySelectorAll('.swatch').forEach(function (btn) {
       btn.addEventListener('click', function () {
         document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
@@ -223,40 +224,40 @@
         ctx.strokeStyle = btn.getAttribute('data-color');
       });
     });
-
+ 
     document.getElementById('clear-pad').addEventListener('click', function () {
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       hasDrawn = false;
     });
-
+ 
     // ---- random text color, regenerated on every page load, same as original ----
     function randomHexColor() {
       return '#' + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0').toUpperCase();
     }
-
+ 
     // ---- submit a post ----
     document.getElementById('board-form').addEventListener('submit', async function (e) {
       e.preventDefault();
-
+ 
       const submitBtn = e.target.querySelector('button[type="submit"]');
       if (submitBtn.disabled) return; // already saving, ignore extra clicks
       submitBtn.disabled = true;
-
+ 
       const text = document.getElementById('message-input').value.trim().slice(0, 500);
       const drawingData = hasDrawn ? canvas.toDataURL('image/png') : null;
-
+ 
       if (!text && !drawingData) {
         submitBtn.disabled = false;
         return;
       }
-
+ 
       try {
         // figure out the next post number, like the old text1/doodle1 scheme
         const lastPostQuery = query(postsCol, orderBy('postNum', 'desc'), limit(1));
         const lastPostSnap = await getDocs(lastPostQuery);
         const nextPostNum = lastPostSnap.empty ? 1 : lastPostSnap.docs[0].data().postNum + 1;
-
+ 
         await addDoc(postsCol, {
           text: text || null,
           drawing: drawingData,
@@ -264,46 +265,53 @@
           postedAt: new Date().toLocaleString(), // readable date, for browsing in Firestore console only
           createdAt: Date.now() // used only for sorting, never displayed
         });
-
+ 
         document.getElementById('message-input').value = '';
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         hasDrawn = false;
-
+ 
         loadPosts();
+      } catch (err) {
+        console.error('post failed:', err);
+        alert("your post didn't go through, try again in a bit");
       } finally {
         submitBtn.disabled = false;
       }
     });
-
+ 
     // ---- load posts, newest first, same as original ----
     async function loadPosts() {
       const boardEl = document.getElementById('board');
       boardEl.innerHTML = '';
-
+ 
       const q = query(postsCol, orderBy('createdAt', 'desc'));
       const snapshot = await getDocs(q);
-
+ 
       snapshot.forEach(doc => {
         const post = doc.data();
         const div = document.createElement('div');
         div.className = 'post';
         div.style.color = randomHexColor();
-
+ 
+        // a post can have text, a drawing, or both: show whatever it has
         if (post.text) {
-          div.textContent = post.text;
-        } else if (post.drawing) {
+          div.appendChild(document.createTextNode(post.text));
+        }
+        if (post.drawing) {
           const img = document.createElement('img');
           img.src = post.drawing;
           img.alt = 'doodle';
+          if (post.text) img.style.marginTop = '10px';
           div.appendChild(img);
         }
         boardEl.appendChild(div);
       });
     }
-
+ 
     loadPosts();
   </script>
-
+ 
 </body>
 </html>
+ 
