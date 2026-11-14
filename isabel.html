@@ -174,11 +174,10 @@ im learning lessons i should have learned earlier
     left: 50%;
     transition: left 3s linear, top 3s linear, transform 0.3s;
     cursor: grab;
-    touch-action: none;            /* so dragging on a phone doesn't scroll the page */
-    user-select: none;
+    touch-action: none;            /* no phone scroll*/
     -webkit-user-select: none;
     -webkit-user-drag: none;
-    -webkit-touch-callout: none;   /* no "save image" popup on long press (iOS) */
+    -webkit-touch-callout: none; 
   }
   #walker.held { cursor: grabbing; }
 </style>
@@ -188,15 +187,15 @@ im learning lessons i should have learned earlier
 <script>
   const walker = document.getElementById('walker');
   let facingLeft = false;
-  let held = false;          // true while someone is holding him
-  let pauseUntil = 0;        // after being dropped, he stands still for a moment
+  let held = false;        
+  let pauseUntil = 0;       
   let grabDX = 0, grabDY = 0;
 
-  // load the second sprite ahead of time so there's no flash when you click him
+  // 
   new Image().src = 'g2.png';
 
   function wander() {
-    // don't walk away while he's being held (or right after he's dropped)
+    // GOT HIM
     if (held || Date.now() < pauseUntil) {
       setTimeout(wander, 300);
       return;
@@ -225,21 +224,20 @@ im learning lessons i should have learned earlier
     setTimeout(wander, nextMoveIn);
   }
 
-  // ---- click to turn into g2.png, drag while held, let go to turn back ----
   walker.addEventListener('pointerdown', e => {
     e.preventDefault();
     held = true;
-    walker.setPointerCapture(e.pointerId);   // keep getting events even if the pointer leaves him
+    walker.setPointerCapture(e.pointerId);   
     walker.src = 'g2.png';
     walker.classList.add('held');
 
-    // freeze him exactly where he is right now (he might be mid-walk)
+  
     const r = walker.getBoundingClientRect();
     walker.style.transition = 'none';
     walker.style.left = r.left + 'px';
     walker.style.top = r.top + 'px';
 
-    // remember where on his body you grabbed him so he doesn't jump
+
     grabDX = e.clientX - r.left;
     grabDY = e.clientY - r.top;
   });
@@ -255,11 +253,11 @@ im learning lessons i should have learned earlier
   function letGo() {
     if (!held) return;
     held = false;
-    pauseUntil = Date.now() + 1000;          // stand still for a second, then carry on wandering
+    pauseUntil = Date.now() + 1000;        
     walker.src = 'g.gif';
     walker.classList.remove('held');
-    void walker.offsetWidth;                 // flush so the last drag move doesn't animate
-    walker.style.transition = '';            // back to the slow 3s walking transition
+    void walker.offsetWidth;                
+    walker.style.transition = '';            
   }
   walker.addEventListener('pointerup', letGo);
   walker.addEventListener('pointercancel', letGo);
